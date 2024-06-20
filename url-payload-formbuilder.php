@@ -9,6 +9,7 @@ Author: Marcio Fão
 Author URI: http://marciofao.github.io
 
 */
+require_once('acf_fields.php');
 
 add_action( 'init', 'upf_init');
 
@@ -26,8 +27,7 @@ function upf_init(){
         $request_details = $chunkedArray[0];
         // The second chunk will contain the remaining items
         $form_fields = array_merge(...array_slice($chunkedArray, 1));
-      //  $post_id = upf_create_post($request_details);
-      $post_id=1;
+        $post_id = upf_create_post($request_details, $form_fields);
         upf_form_build($form_fields, $post_id);
         
         die;
@@ -64,7 +64,7 @@ function upf_form_build($data, $post_id){
             height: 100px;
         }
     </style>
-        <form method="post">
+        <form method="post" action="/?rfq_submit=<?php echo $post_id ?>" >
             <?php 
                 foreach($data as $key => $value){
                     if(is_string($data[$key])){
@@ -124,13 +124,36 @@ function upf_is_expired($date1, $date2) {
     return $hours >= $hours_limit;
 }
 
-function upf_create_post($details){
+function upf_create_post($details,$fields){
+    global $wpdb;
+
+    $rfq_id = $details[1];
+    $project_identifier = $details[5];
+
+    $post_id = $wpdb->get_var("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'rfq_id' AND meta_value = '".$rfq_id."'");
+    if($post_id) return $post_id;   
+
     $postarr = array(
-        'post_title' => $details->name,
-        'post_content' => $details->description,
+        'post_title' => $rfq_id.' - '.$project_identifier,
+        'post_content' => '',
         'post_status' => 'publish',
-        'post_type' => 'quote_request'
+        'post_type' => 'quote-request'
     );
-  //  $post_id = wp_insert_post( $postarr:array, $wp_error:boolean, $fire_after_hooks:boolean )
-  //  return $post_id;
+
+    if(!$post_id = wp_insert_post($postarr)) die('error on saving information');
+
+    update_post_meta($post_id, 'rfq_id', $rfq_id);
+    update_post_meta($post_id, 'project_identifier', $project_identifier);
+    update_post_meta($post_id, 'requester_name', $details[2]);
+    update_post_meta($post_id, 'requester_email', $details[3]);
+    update_post_meta($post_id, 'request_company_name', $details[4]);
+    update_post_meta($post_id, '1_broker_name', $details[6]);
+    update_post_meta($post_id, '1_broker_email', $details[7]);
+    update_post_meta($post_id, '2_broker_name', $details[8]);
+    update_post_meta($post_id, '2_broker_email', $details[9]);
+    update_post_meta($post_id, '3_broker_name', $details[10]);
+    update_post_meta($post_id, '3_broker_email', $details[11]);
+    update_post_meta($post_id, 'fields', json_encode($fields, JSON_PRETTY_PRINT));
+
+    return $post_id;
 }
