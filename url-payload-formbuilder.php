@@ -41,8 +41,17 @@ function upf_init(){
         upf_store_user_request($data);
     }
     
-    
-     //if quote reply ...
+    //if quote reply ...
+    if(isset($_GET['quote_reply']) && !empty($_GET['quote_reply'])) {
+        if(!isset($_GET['id']) || empty($_GET['id'])) wp_die('invalid url');
+        upf_store_quote_reply();
+    }
+
+    //if quote answer ...
+    if(isset($_GET['quote_answer']) && !empty($_GET['quote_answer'])) {
+        if(!isset($_GET['id']) || empty($_GET['id'])) wp_die('invalid url');
+        upf_store_quote_answer();
+    }
 }   
 
 function upf_form_build($data, $post_id, $request_details){
@@ -216,4 +225,86 @@ function upf_send_messages($post_id){
         $i++;
     }
     
+}
+
+function upf_store_quote_reply(){
+    $post_id = intval($_GET['id']);
+    $reply_id = intval($_GET['quote_reply']);
+    $user_data = [];
+    $user_data['RFQ ID'] =  get_post_meta($post_id, 'rfq_id', true);
+    $user_data['Project Identifier'] =  get_post_meta($post_id, 'project_identifier', true);
+   
+    $user_filled = json_decode(get_post_meta($post_id, 'user_filled_fields', true), true);
+    $user_data = array_merge($user_data, $user_filled);
+
+    $user_data['Aditional Details'] =  get_post_meta($post_id, 'additional_details', true);
+    
+    ?>
+    
+    <style>
+        body,html{
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background: #f5f5f5;
+            font-size: 15px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        label{
+            display: block;
+            margin-bottom: 5px;
+        }
+        form{
+            margin: 0 auto;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        input,textarea,select{
+            width: 100%;
+        }
+        textarea{
+            height: 100px;
+        }
+    </style>
+
+    <form method="post" action="?quote_answer=<?php echo $reply_id ?>&id=<?php echo $post_id ?>">
+        <?php foreach($user_data as $key => $value):?>
+            <p>
+                <?php echo str_replace('_', ' ',$key);?>: <?php echo $value?>
+            </p>
+        <?php endforeach ?>
+        <label>Your Quote:</label>
+        <textarea name="broker_quote" ></textarea>
+        <input type="submit" value="Submit Quote">
+    </form>
+
+<?php
+die;
+}
+
+function upf_store_quote_answer(){
+    $post_id = intval($_GET['id']);
+    $reply_id = intval($_GET['quote_answer']);
+    $quote = $_POST['broker_quote'];
+    update_post_meta( $post_id, $reply_id.'_broker_comments', $quote);
+    upf_notify_team($post_id);
+    die;
+}
+
+function upf_notify_team($post_id){
+    ?>
+    <style>
+        body,html{
+            text-align: center;
+        }
+        h3{
+            margin-top: 20px;x
+        }
+    </style>
+    <h3>Email to be sent to team:</h3>
+    <p>New quote received!</p>
+    <p><a href="<?php echo site_url().'/wp-admin/post.php?post='.$post_id.'&action=edit' ?>" >Click here to view</a></p>
+    
+    <?php
 }
