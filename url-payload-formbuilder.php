@@ -18,8 +18,10 @@ function upf_init(){
         if(empty($_GET['quote'])) return;
 
         $data = json_decode(base64_decode($_GET['quote']));
+        
+        if(is_null($data)) wp_die('Invalid URL');
 
-        if(upf_is_expired(upf_getCurrentGMTDate(),$data[0])) die('URL expired');
+        if(upf_is_expired(upf_getCurrentGMTDate(),$data[0])) wp_die('URL expired');
 
         $splitAfter = 12; // Split the array after x items
         $chunkedArray = array_chunk($data, $splitAfter);
@@ -28,17 +30,24 @@ function upf_init(){
         // The second chunk will contain the remaining items
         $form_fields = array_merge(...array_slice($chunkedArray, 1));
         $post_id = upf_create_post($request_details, $form_fields);
-        upf_form_build($form_fields, $post_id);
+        upf_form_build($form_fields, $post_id, $request_details);
         
         die;
     }
-    //if quote reply ...
+
     //if submit...
+    if(isset($_POST['upf_rfq']) && !empty($_POST['upf_rfq'])) {
+        $data = array_map('sanitize_text_field', $_POST);
+        upf_store_user_request($data);
+    }
     
+    
+     //if quote reply ...
 }   
 
-function upf_form_build($data, $post_id){
+function upf_form_build($data, $post_id, $request_details){
     ?>
+    
     <style>
         body,html{
             margin: 0;
@@ -56,6 +65,7 @@ function upf_form_build($data, $post_id){
         form{
             margin: 0 auto;
             max-width: 400px;
+            margin-top: 20px;
         }
         input,textarea,select{
             width: 100%;
@@ -64,35 +74,40 @@ function upf_form_build($data, $post_id){
             height: 100px;
         }
     </style>
-        <form method="post" action="/?rfq_submit=<?php echo $post_id ?>" >
-            <?php 
-                foreach($data as $key => $value){
-                    if(is_string($data[$key])){
-                        ufp_build_text_input($value);
-                    }elseif(is_array($data[$key])){
-                        ufp_build_select_input($value);
-                    }    
-                }
-            ?>
+
+    <form method="post" action="?rfq_submit">
+        <?php wp_nonce_field('upf_request_quote', 'upf_nonce'); ?>
+        <h3>Request a quote</h3>
+        <p>Project: <?php echo $request_details[5] ?></p>
+        <?php 
+            foreach($data as $key => $value){
+                if(is_string($data[$key])){
+                    ufp_build_text_input($value);
+                }elseif(is_array($data[$key])){
+                    ufp_build_select_input($value);
+                }    
+            }
+        ?>
+        <input name='upf_rfq' value="<?php echo $post_id ?>" style="display: none;" maxlength="100">
         Quantity:
         <input type="number" name="quantity">
         Price:
         <input type="number" name="price">
         Delivery:
-        <input type="text" name="delivery" placeholder="Spot/Date">
+        <input type="text" name="spotdeliverydate" placeholder="Spot/Date" maxlength="100">
         Aditional Details:
-        <textarea name="aditional_details"></textarea>
+        <textarea name="additional_details"></textarea>
         <input type="submit" value="Request Quote">
-        </form>
-        <?php
-    
+    </form>
+
+    <?php
 }
 
 function ufp_build_text_input($label){
     $name = strtolower(str_replace(' ', '_', $label));
     ?>
     <label for="<?php echo $name ?>"> <?php echo $label ?> </label>
-    <input type="text" name="<?php echo $name ?>" />
+    <input type="text" name="<?php echo $name ?>"  maxlength="100"/>
     <?php
 }
 
@@ -100,7 +115,7 @@ function ufp_build_select_input($arr){
     $name = strtolower(str_replace(' ', '_', $arr[0]));
     ?>
     <label for="<?php echo $name ?>"> <?php echo $arr[0] ?> </label>
-    <select name=""<?php echo $name ?>"">
+    <select name="<?php echo $name ?>">
         <?php array_shift($arr) ?>
         <?php foreach($arr as $value):?>
             <option value="<?php echo $value ?> "> <?php echo $value ?> </option>
@@ -125,13 +140,14 @@ function upf_is_expired($date1, $date2) {
 }
 
 function upf_create_post($details,$fields){
+        
     global $wpdb;
 
     $rfq_id = $details[1];
     $project_identifier = $details[5];
 
-    $post_id = $wpdb->get_var("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'rfq_id' AND meta_value = '".$rfq_id."'");
-    if($post_id) return $post_id;   
+    $post_id = $wpdb->get_var("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'rfq_id' AND meta_value = '".$rfq_id."' ORDER BY meta_id DESC LIMIT 1");
+    if($post_id) return $post_id;
 
     $postarr = array(
         'post_title' => $rfq_id.' - '.$project_identifier,
@@ -156,4 +172,48 @@ function upf_create_post($details,$fields){
     update_post_meta($post_id, 'fields', json_encode($fields, JSON_PRETTY_PRINT));
 
     return $post_id;
+}
+
+function upf_store_user_request($data){
+    //var_dump($data);die;
+    //get position of rfq_id field
+    //var_dump(array_keys($data));die;
+    $rfq_id_position = array_search('upf_rfq', array_keys($data));
+    $custom_fields = array_slice($data, 2, $rfq_id_position, true);
+    $fixed_fields = array_slice($data, $rfq_id_position, null, true);
+    
+    $post_id = intval($fixed_fields['upf_rfq']);
+    //var_dump($post_id);
+    update_post_meta( $post_id, 'user_filled_fields', json_encode($custom_fields, JSON_PRETTY_PRINT));
+    foreach($fixed_fields as $key => $value){
+        update_post_meta( $post_id, $key, $value);
+    }
+
+    foreach($custom_fields as $key => $value){
+        if(strtolower($key) == 'vintage' || strtolower($key) == 'vintages') 
+        update_post_meta( $post_id, 'vintages', $value);
+    }
+    
+    upf_send_messages($post_id);
+    
+}
+
+function upf_send_messages($post_id){
+    $broker_emails[] = get_post_meta($post_id, '1_broker_email', true);
+    $broker_emails[] = get_post_meta($post_id, '2_broker_email', true);
+    $broker_emails[] = get_post_meta($post_id, '3_broker_email', true);
+
+    $i=1;
+    foreach($broker_emails as $broker_email){
+
+        if($broker_email){
+            $url = site_url().'?quote_reply='.$i.'&id='. $post_id;
+            $message = "New quote Requested.<br><br>";;
+            $message.= "Click here to view: <a href='$url'>$url</a>";
+            $headers[] = 'Content-type: text/html; charset=utf-8';
+            wp_mail( $broker_email, "New quote Requested", $message, $headers );
+        }
+        $i++;
+    }
+    
 }
