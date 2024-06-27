@@ -114,6 +114,10 @@ h1 {
     border-radius: 2px;
     padding: 5px;
 }
+.error-notice{
+    font-size: 12px;
+    color: #d33b15;
+}
 
 .add-new-quote {
     font-size: 16px;

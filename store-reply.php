@@ -117,9 +117,9 @@ $available_vintages = upf_get_vintages();
                                     <div class="row">
                                         <div class="col-md-4 pr-res">
                                             Project ID
-                                            <input type="text" name="project_id" class="mb-2">
+                                            <input type="text" name="project_id" class="mb-2" required>
                                             Vintage
-                                            <select name="vintage" class="mb-2">
+                                            <select name="vintage" class="mb-2" required>
                                                 <?php foreach ($available_vintages as $available_vintage) : ?>
                                                     <option value="<?php echo $available_vintage ?>"><?php echo $available_vintage ?></option>
                                                 <?php endforeach ?>
@@ -129,7 +129,7 @@ $available_vintages = upf_get_vintages();
                                             Delivery
                                             <div class="mb-2">
                                                 <label class="wu">
-                                                    <input type="radio" name="delivery" value="spot" class="wu">
+                                                    <input type="radio" name="delivery" value="spot" class="wu" checked>
                                                     Spot
                                                 </label>
                                                 <label class="wu ml-1">
@@ -137,13 +137,13 @@ $available_vintages = upf_get_vintages();
                                                     Forward</label>
                                             </div>
                                             Forward Date
-                                            <input type="date">
+                                            <input name="forward_date" type="date" required>
                                         </div>
                                         <div class="col-md-4 pr-res">
                                             Volume (tCO2e)
-                                            <input type="text" class="mb-2">
+                                            <input name="volume" type="text" class="mb-2" required>
                                             Price (USD)
-                                            <input type="text" class="mb-2">
+                                            <input name="price" type="text" class="mb-2" required>
                                         </div>
                                     </div>
                                 </div>
@@ -168,9 +168,6 @@ $available_vintages = upf_get_vintages();
                     <input type="submit" value="Submit response" class="submit-response-btn mt-4">
                 </div>
             </form>
-
-
-
 
         </div>
         
@@ -213,4 +210,51 @@ $available_vintages = upf_get_vintages();
             isFirstItemUndeletable: true
         })
     });
+</script>
+
+<script>
+
+    // Wait for the DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the form element
+    var form = document.querySelector('form.reply-content');
+
+    // Add an event listener for the submit event
+    form.addEventListener('submit', function(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Remove any existing error messages
+        var errorMessages = document.querySelectorAll('.error-message, .error-notice');
+        errorMessages.forEach(function(message) {
+            message.parentNode.removeChild(message);
+        });
+
+        // Get all required fields
+        var requiredFields = form.querySelectorAll('[required]');
+
+        // Check if any required field is empty
+        var hasEmptyField = false;
+        requiredFields.forEach(function(field) {
+            if (field.value.trim() === '') {
+                hasEmptyField = true;
+
+                field.classList.add('error-message');
+                // Create an error message element
+                var errorMessage = document.createElement('div');
+                errorMessage.classList.add('error-notice');
+                errorMessage.textContent = 'This field is required';
+
+                // Insert the error message after the field
+                field.parentNode.insertBefore(errorMessage, field.nextSibling);
+            }
+        });
+
+        // If all required fields are filled, submit the form
+        if (!hasEmptyField) {
+            form.submit();
+        }
+    });
+});
+
 </script>
