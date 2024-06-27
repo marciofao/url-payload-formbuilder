@@ -1,0 +1,171 @@
+/* General Styles */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+body,
+html {
+    background-color: #f4f5f0;
+    font-family: "Poppins", sans-serif;
+    color: #121212;
+    margin: 0;
+    padding: 0;
+}
+
+.w100{
+    width: 100% !important;
+}
+.h100{
+    height: 100%;
+}
+.wu{
+width: unset;
+display: inline;
+}
+
+/* Top Left */
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.top-left-text {
+    font-size: 16px;
+}
+
+/* Top Right */
+.request-details {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.request-id {
+    font-size: 16px;
+    color: #adadad;
+}
+
+.top-right-box {
+    background-color: #f0f3e3;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.top-right-box label {
+    font-size: 16px;
+    color: #545454;
+}
+
+.top-right-box .inner {
+    font-size: 16px;
+}
+
+/* Bottom Part */
+.your-response {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.mandatory-fields, .gray-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #545454;
+}
+
+.reply-content{
+    border-radius: 6px;
+    border: 1px solid #545454;
+    padding: 10px;
+}
+
+.bottom-box {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Response Form */
+.input-field {
+    height: 32px;
+    width: 200px;
+    border-radius: 2px;
+    border: 1px solid #adadad;
+    padding: 5px;
+}
+
+.textarea{
+    border-radius: 2px;
+    border: 1px solid #adadad;
+    padding: 5px;
+}
+
+.input-field::placeholder {
+    color: #545454;
+}
+
+.input-field:focus {
+    color: #121212;
+}
+
+.input-field:disabled {
+    color: #adadad;
+}
+
+.error-message {
+    font-size: 12px;
+    color: #d33b15;
+    border: 1px solid #d33b15;
+    border-radius: 2px;
+    padding: 5px;
+}
+
+.add-new-quote {
+    font-size: 16px;
+    color: #88ad1f;
+    text-decoration: underline;
+}
+
+.additional-information {
+    font-size: 16px;
+    color: #545454;
+}
+
+.additional-information::placeholder {
+    color: #545454;
+}
+
+/* Submit Response Button */
+.submit-response-btn {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #88ad1f;
+    border-radius: 5px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+form {
+    margin: 0 auto;
+    max-width: 400px;
+    margin-top: 20px;
+}
+input,
+textarea,
+select {
+    width: 100%;
+}
+textarea {
+    height: 100px;
+}
+
+.content{
+    padding: 20px;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.pr-res{
+    padding-right: 18%;
+}
+

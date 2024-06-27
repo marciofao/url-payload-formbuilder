@@ -55,59 +55,36 @@ function upf_init(){
 }   
 
 function upf_form_build($data, $post_id, $request_details){
+    require_once('styling-header.php');
     ?>
-    
-    <style>
-        body,html{
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background: #f5f5f5;
-            font-size: 15px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        label{
-            display: block;
-            margin-bottom: 5px;
-        }
-        form{
-            margin: 0 auto;
-            max-width: 400px;
-            margin-top: 20px;
-        }
-        input,textarea,select{
-            width: 100%;
-        }
-        textarea{
-            height: 100px;
-        }
-    </style>
-
-    <form method="post" action="?rfq_submit">
-        <?php wp_nonce_field('upf_request_quote', 'upf_nonce'); ?>
-        <h3>Request a quote</h3>
-        <p>Project: <?php echo $request_details[5] ?></p>
-        <?php 
-            foreach($data as $key => $value){
-                if(is_string($data[$key])){
-                    ufp_build_text_input($value);
-                }elseif(is_array($data[$key])){
-                    ufp_build_select_input($value);
-                }    
-            }
-        ?>
-        <input name='upf_rfq' value="<?php echo $post_id ?>" style="display: none;" maxlength="100">
-        Quantity:
-        <input type="number" name="quantity">
-        Price:
-        <input type="number" name="price">
-        Delivery:
-        <input type="text" name="spotdeliverydate" placeholder="Spot/Date" maxlength="100">
-        Aditional Details:
-        <textarea name="additional_details"></textarea>
-        <input type="submit" value="Request Quote">
-    </form>
+    <div class="content">
+        <img src="<?php echo plugin_dir_url( __FILE__ ) ?>/main-logo.svg" alt="Company Logo" class="mb-5 mt-5">
+        
+        <form method="post" action="?rfq_submit" class="top-right-box">
+            <?php wp_nonce_field('upf_request_quote', 'upf_nonce'); ?>
+            <h1>Request a quote</h1>
+            <p class="request-details">Project: <?php echo $request_details[5] ?></p>
+            <?php 
+                foreach($data as $key => $value){
+                    if(is_string($data[$key])){
+                        ufp_build_text_input($value);
+                    }elseif(is_array($data[$key])){
+                        ufp_build_select_input($value);
+                    }    
+                }
+            ?>
+            <input name='upf_rfq' value="<?php echo $post_id ?>" style="display: none;" maxlength="100">
+            Quantity:
+            <input type="number" name="quantity" class="input-field w100 mb-2">
+            Price:
+            <input type="number" name="price" class="input-field w100 mb-2">
+            Delivery:
+            <input type="text" name="spotdeliverydate" placeholder="Spot/Date" class="input-field w100 mb-2" maxlength="100">
+            Aditional Details:
+            <textarea name="additional_details" class="textarea w100"></textarea>
+            <input type="submit" value="Request Quote" class="submit-response-btn mt-2">
+        </form>
+    </div>
 
     <?php
 }
@@ -116,7 +93,7 @@ function ufp_build_text_input($label){
     $name = strtolower(str_replace(' ', '_', $label));
     ?>
     <label for="<?php echo $name ?>"> <?php echo $label ?> </label>
-    <input type="text" name="<?php echo $name ?>"  maxlength="100"/>
+    <input type="text" name="<?php echo $name ?>"  maxlength="100" class="input-field w100 mb-2"/>
     <?php
 }
 
@@ -124,7 +101,7 @@ function ufp_build_select_input($arr){
     $name = strtolower(str_replace(' ', '_', $arr[0]));
     ?>
     <label for="<?php echo $name ?>"> <?php echo $arr[0] ?> </label>
-    <select name="<?php echo $name ?>">
+    <select name="<?php echo $name ?>" class="input-field w100 mb-2">
         <?php array_shift($arr) ?>
         <?php foreach($arr as $value):?>
             <option value="<?php echo $value ?> "> <?php echo $value ?> </option>
@@ -212,6 +189,28 @@ function upf_send_messages($post_id){
     $broker_emails[] = get_post_meta($post_id, '2_broker_email', true);
     $broker_emails[] = get_post_meta($post_id, '3_broker_email', true);
 
+    require_once('styling-header.php');
+?>
+
+<div class="content">
+    <img src="<?php echo plugin_dir_url( __FILE__ ) ?>/main-logo.svg" alt="Company Logo" class="mb-5 mt-5">
+    <div>
+        <div class="row p-5 mt-5 top-right-box">
+            <div class="col-1">
+                <img src="<?php echo plugin_dir_url( __FILE__ ) ?>v-check-green.svg" alt="green-confirm" class="w100">
+            </div>
+            <div class="col-11 d-flex align-items-center">
+                <h1 class="lh100 m-0">Quote Request sent successfully!</h1>
+            </div>
+
+        </div>
+    </div>  
+</div>
+
+Messages sent to brokers:
+<?php
+
+    
     $i=1;
     foreach($broker_emails as $broker_email){
 
@@ -223,63 +222,15 @@ function upf_send_messages($post_id){
             wp_mail( $broker_email, "New quote Requested", $message, $headers );
         }
         $i++;
+        echo '<br>'.$i.':<br>';
+        echo $message.'<br>';
+
     }
-    
+    die;
 }
 
 function upf_store_quote_reply(){
-    $post_id = intval($_GET['id']);
-    $reply_id = intval($_GET['quote_reply']);
-    $user_data = [];
-    $user_data['RFQ ID'] =  get_post_meta($post_id, 'rfq_id', true);
-    $user_data['Project Identifier'] =  get_post_meta($post_id, 'project_identifier', true);
-   
-    $user_filled = json_decode(get_post_meta($post_id, 'user_filled_fields', true), true);
-    $user_data = array_merge($user_data, $user_filled);
-
-    $user_data['Aditional Details'] =  get_post_meta($post_id, 'additional_details', true);
-    
-    ?>
-    
-    <style>
-        body,html{
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background: #f5f5f5;
-            font-size: 15px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        label{
-            display: block;
-            margin-bottom: 5px;
-        }
-        form{
-            margin: 0 auto;
-            max-width: 400px;
-            margin-top: 20px;
-        }
-        input,textarea,select{
-            width: 100%;
-        }
-        textarea{
-            height: 100px;
-        }
-    </style>
-
-    <form method="post" action="?quote_answer=<?php echo $reply_id ?>&id=<?php echo $post_id ?>">
-        <?php foreach($user_data as $key => $value):?>
-            <p>
-                <?php echo str_replace('_', ' ',$key);?>: <?php echo $value?>
-            </p>
-        <?php endforeach ?>
-        <label>Your Quote:</label>
-        <textarea name="broker_quote" ></textarea>
-        <input type="submit" value="Submit Quote">
-    </form>
-
-<?php
+    require_once('store-reply.php');
 die;
 }
 
@@ -294,6 +245,7 @@ function upf_store_quote_answer(){
 
 function upf_notify_team($post_id){
     ?>
+    <?php require_once('styling-header.php') ?>
     <style>
         body,html{
             text-align: center;
@@ -308,3 +260,4 @@ function upf_notify_team($post_id){
     
     <?php
 }
+
