@@ -85,6 +85,7 @@ function upf_form_build($data, $post_id, $request_details){
             <input type="submit" value="Request Quote" class="submit-response-btn mt-2">
         </form>
     </div>
+    <?php require_once('footer.php') ?>
 
     <?php
 }
@@ -206,7 +207,9 @@ function upf_send_messages($post_id){
         </div>
     </div>  
 </div>
+<?php require_once('footer.php') ?>
 
+(this will be removed in final version)
 Messages sent to brokers:
 <?php
 

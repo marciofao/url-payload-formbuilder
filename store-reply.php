@@ -108,93 +108,90 @@ $available_vintages = upf_get_vintages();
             <div class="col-md-6 mandatory-fields text-end">
                 All fields are mandatory
             </div>
-            <div class="reply-content repeater col-md-12" data-repeater-list="quote">
-                
-                    <div class="row p-4 pb-0"  data-repeater-item>
-                        <div class="col-11">
-                            <div class="row">
-                                <div class="col-md-4 pr-res">
-                                    Project ID
-                                    <input type="text" name="project_id" class="mb-2">
-                                    Vintage
-                                    <select name="vintage" class="mb-2">
-                                        <?php foreach ($available_vintages as $available_vintage) : ?>
-                                            <option value="<?php echo $available_vintage ?>"><?php echo $available_vintage ?></option>
-                                        <?php endforeach ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 pr-res">
-                                    Delivery
-                                    <div class="mb-2">
-                                        <label class="wu">
-                                            <input type="radio" name="delivery" value="spot" class="wu">
-                                            Spot
-                                        </label>
-                                        <label class="wu ml-1">
-                                            <input type="radio" name="delivery" value="forward" class="wu">
-                                            Forward</label>
+            <form class="reply-content col-md-12">
+                <div class="repeater">
+                    <div data-repeater-list="quote">
+                        <div data-repeater-item>
+                            <div class="row p-4 pb-0">
+                                <div class="col-11">
+                                    <div class="row">
+                                        <div class="col-md-4 pr-res">
+                                            Project ID
+                                            <input type="text" name="project_id" class="mb-2">
+                                            Vintage
+                                            <select name="vintage" class="mb-2">
+                                                <?php foreach ($available_vintages as $available_vintage) : ?>
+                                                    <option value="<?php echo $available_vintage ?>"><?php echo $available_vintage ?></option>
+                                                <?php endforeach ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 pr-res">
+                                            Delivery
+                                            <div class="mb-2">
+                                                <label class="wu">
+                                                    <input type="radio" name="delivery" value="spot" class="wu">
+                                                    Spot
+                                                </label>
+                                                <label class="wu ml-1">
+                                                    <input type="radio" name="delivery" value="forward" class="wu">
+                                                    Forward</label>
+                                            </div>
+                                            Forward Date
+                                            <input type="date">
+                                        </div>
+                                        <div class="col-md-4 pr-res">
+                                            Volume (tCO2e)
+                                            <input type="text" class="mb-2">
+                                            Price (USD)
+                                            <input type="text" class="mb-2">
+                                        </div>
                                     </div>
-                                    Forward Date
-                                    <input type="date">
                                 </div>
-                                <div class="col-md-4 pr-res">
-                                    Volume (tCO2e)
-                                    <input type="text" class="mb-2">
-                                    Price (USD)
-                                    <input type="text" class="mb-2">
+                                <div class="col-1 text-end">
+                                    <a data-repeater-delete href="#" aria-label="delete" class="remove-quote">✖</a>
                                 </div>
+                                <hr class="mt-4">
                             </div>
                         </div>
-                        <div class="col-1">
-                            <input data-repeater-delete type="button" value="✖" aria-label="delete" />
-                        </div>
-                        <hr class="mt-4">
                     </div>
-                    
                     <div class="text-end">
-                    <button data-repeater-create >Add new quote</button>
+                        <a data-repeater-create btn-secondary href="#" class="add-new-quote">
+                            Add new quote
+                        </a>
                     </div>
                     <br>
                     <br>
-                    Aditional Information
-                    <textarea name="aditional_info" placeholder="Type Here..."></textarea>
+                </div>
+                Aditional Information
+                <textarea name="aditional_info" placeholder="Type Here..."></textarea>
+                <div class="text-end">
+                    <input type="submit" value="Submit response" class="submit-response-btn mt-4">
+                </div>
+            </form>
 
-            </div>
+
+
+
         </div>
-        <form method="post" action="?quote_answer=<?php echo $reply_id ?>&id=<?php echo $post_id ?>">
-            <?php foreach ($user_data as $key => $value) : ?>
-                <p>
-                    <?php echo str_replace('_', ' ', $key); ?>: <?php echo $value ?>
-                </p>
-            <?php endforeach ?>
-            <label>Your Quote:</label>
-            <textarea name="broker_quote"></textarea>
-            <input type="submit" value="Submit Quote">
-        </form>
+        
     </div>
 </div>
+<?php require_once('footer.php') ?>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('.repeater').repeater({
             // (Optional)
             // start with an empty list of repeaters. Set your first (and only)
             // "data-repeater-item" with style="display:none;" and pass the
             // following configuration flag
             initEmpty: false,
-            // (Optional)
-            // "defaultValues" sets the values of added items.  The keys of
-            // defaultValues refer to the value of the input's name attribute.
-            // If a default value is not specified for an input, then it will
-            // have its value cleared.
-            defaultValues: {
-                'text-input': 'foo'
-            },
+
             // (Optional)
             // "show" is called just after an item is added.  The item is hidden
             // at this point.  If a show callback is not given the item will
             // have $(this).show() called on it.
-            show: function () {
+            show: function() {
                 $(this).slideDown();
             },
             // (Optional)
@@ -204,12 +201,12 @@ $available_vintages = upf_get_vintages();
             // "hide" allows for a confirmation step, to send a delete request
             // to the server, etc.  If a hide callback is not given the item
             // will be deleted.
-            hide: function (deleteElement) {
-                if(confirm('Are you sure you want to delete this element?')) {
+            hide: function(deleteElement) {
+                if (confirm('Are you sure you want to delete this element?')) {
                     $(this).slideUp(deleteElement);
                 }
             },
-           
+
             // (Optional)
             // Removes the delete button from the first list item,
             // defaults to false.

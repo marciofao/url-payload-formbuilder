@@ -72,6 +72,7 @@ h1 {
     border-radius: 6px;
     border: 1px solid #545454;
     padding: 10px;
+    color: #545454;
 }
 
 .bottom-box {
@@ -120,6 +121,12 @@ h1 {
     text-decoration: underline;
 }
 
+.remove-quote {
+    font-size: 16px;
+    color: #88ad1f !important;
+    text-decoration: none;
+}
+
 .additional-information {
     font-size: 16px;
     color: #545454;
@@ -139,6 +146,7 @@ h1 {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
+    width: unset;
 }
 
 label {
@@ -154,9 +162,14 @@ input,
 textarea,
 select {
     width: 100%;
+    background-color: #f4f5f0;
+    border-radius: 2px;
+    font-size: 16px;
+    border: 1px solid #adadad;
 }
 textarea {
     height: 100px;
+    resize: none;
 }
 
 .content{
